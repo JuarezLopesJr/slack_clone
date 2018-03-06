@@ -6,14 +6,11 @@ import {
   Form,
   Grid,
   Header,
-  // Image,
-  // Message,
-  Segment
+  Segment,
+  Message
 } from 'semantic-ui-react';
 import _isEmpty from 'lodash/isEmpty';
 import Validator from 'validator';
-
-import InlineMessage from '../messages/InlineMessage';
 
 const registerMutation = gql`
   mutation($username: String!, $email: String!, $password: String!) {
@@ -47,27 +44,36 @@ class RegisterPage extends Component {
     this.setState({ errors });
     if (_isEmpty(errors)) {
       this.setState({ loading: true });
-
+      // this.props.mutate comes from graphql
       const response = await this.props.mutate({ variables: this.state.data });
 
       this.setState({
         loading: false,
         data: { username: '', email: '', password: '' }
       });
+      // prop from react-router
+      this.props.history.push('/');
       console.log(response);
     }
   };
 
   validate = data => {
     const errors = {};
-    if (!data.username) errors.username = 'Provide a username';
+    if (!data.username)
+      errors.username = 'Provide a username with letters and numbers only';
     if (!Validator.isEmail(data.email)) errors.email = 'Invalid email';
-    if (!data.password) errors.password = "Can't be blank";
+    if (!data.password) errors.password = 'Provide a password';
     return errors;
   };
 
   render() {
     const { data, errors, loading } = this.state;
+
+    const errorList = [];
+    if (errors.username) errorList.push(errors.username);
+    if (errors.email) errorList.push(errors.email);
+    if (errors.password) errorList.push(errors.password);
+
     return (
       <div>
         <Grid
@@ -96,7 +102,7 @@ class RegisterPage extends Component {
                   iconPosition="left"
                   placeholder="username"
                 />
-                {errors.username && <InlineMessage text={errors.username} />}
+
                 <Form.Input
                   name="email"
                   value={data.email}
@@ -107,7 +113,7 @@ class RegisterPage extends Component {
                   iconPosition="left"
                   placeholder="user@example.com"
                 />
-                {errors.email && <InlineMessage text={errors.email} />}
+
                 <Form.Input
                   name="password"
                   value={data.password}
@@ -119,13 +125,19 @@ class RegisterPage extends Component {
                   placeholder="Password"
                   type="password"
                 />
-                {errors.password && <InlineMessage text={errors.password} />}
 
                 <Button color="teal" fluid size="large">
                   Register
                 </Button>
               </Segment>
             </Form>
+            {errors.username || errors.email || errors.password ? (
+              <Message
+                error
+                header="There was some errors with your submission"
+                list={errorList}
+              />
+            ) : null}
           </Grid.Column>
         </Grid>
       </div>
