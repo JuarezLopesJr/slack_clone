@@ -18,6 +18,8 @@ const resolvers = mergeResolvers(
   fileLoader(path.join(__dirname, './resolvers'))
 );
 
+const JWT_SECRET = process.env.JWT_SECRET;
+
 const schema = makeExecutableSchema({
   typeDefs,
   resolvers
@@ -28,8 +30,6 @@ const PORT = 8080;
 const app = express();
 app.use(cors('*'));
 
-// create a .env file to pass your db path as MONGO_URL or pass it manually to
-// MongoClient.connect()
 MongoClient.connect(process.env.MONGO_URL, err => {
   if (err) {
     console.log(err);
@@ -45,7 +45,10 @@ mongoose.connect(process.env.MONGO_URL);
 app.use(
   '/graphql',
   bodyParser.json(),
-  graphqlExpress({ schema, context: { User, Member, Team, Channel, Messages } })
+  graphqlExpress({
+    schema,
+    context: { User, Member, Team, Channel, Messages, JWT_SECRET }
+  })
 );
 
 app.use(

@@ -2,6 +2,7 @@ export default `
 
   type User {
     _id: String!
+    jwt: String!
     username: String!
     email: String!
     password: String!
@@ -19,5 +20,7 @@ export default `
       email: String!,
       password: String!
     ):User!
+
+    loginUser(email: String!, password: String!): User!
   }
 `;
