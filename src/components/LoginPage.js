@@ -9,23 +9,22 @@ import {
   Segment,
   Message
 } from 'semantic-ui-react';
+import { Link } from 'react-router-dom';
 import _isEmpty from 'lodash/isEmpty';
 import Validator from 'validator';
 
-const registerMutation = gql`
-  mutation($username: String!, $email: String!, $password: String!) {
-    registerUser(username: $username, email: $email, password: $password) {
-      username
+const loginMutation = gql`
+  mutation($email: String!, $password: String!) {
+    loginUser(email: $email, password: $password) {
       email
-      password
+      _id
     }
   }
 `;
 
-class RegisterPage extends Component {
+class LoginPage extends Component {
   state = {
     data: {
-      username: '',
       email: '',
       password: ''
     },
@@ -44,23 +43,22 @@ class RegisterPage extends Component {
     this.setState({ errors });
     if (_isEmpty(errors)) {
       this.setState({ loading: true });
-      // this.props.mutate comes from graphql
-      const response = await this.props.mutate({ variables: this.state.data });
+
+      const { data } = await this.props.mutate({
+        variables: this.state.data
+      });
 
       this.setState({
         loading: false,
-        data: { username: '', email: '', password: '' }
+        data: { email: '', password: '' }
       });
-      // prop from react-router
+
       this.props.history.push('/');
-      console.log(response);
     }
   };
 
   validate = data => {
     const errors = {};
-    if (!data.username)
-      errors.username = 'Provide a username with letters and numbers only';
     if (!Validator.isEmail(data.email)) errors.email = 'Invalid email';
     if (!data.password) errors.password = 'Provide a password';
     return errors;
@@ -70,7 +68,6 @@ class RegisterPage extends Component {
     const { data, errors, loading } = this.state;
 
     const errorList = [];
-    if (errors.username) errorList.push(errors.username);
     if (errors.email) errorList.push(errors.email);
     if (errors.password) errorList.push(errors.password);
 
@@ -92,17 +89,6 @@ class RegisterPage extends Component {
             </Header>
             <Form size="large" onSubmit={this.onSubmit} loading={loading}>
               <Segment stacked>
-                <Form.Input
-                  name="username"
-                  value={data.username}
-                  onChange={this.onChange}
-                  error={!!errors.username}
-                  fluid
-                  icon="user"
-                  iconPosition="left"
-                  placeholder="username"
-                />
-
                 <Form.Input
                   name="email"
                   value={data.email}
@@ -127,10 +113,13 @@ class RegisterPage extends Component {
                 />
 
                 <Button color="teal" fluid size="large">
-                  Register
+                  Login
                 </Button>
               </Segment>
             </Form>
+            <Message>
+              Don't have an account ? <Link to="/register">Sign Up</Link>
+            </Message>
             {errorList.length ? (
               <Message
                 error
@@ -144,4 +133,4 @@ class RegisterPage extends Component {
     );
   }
 }
-export default graphql(registerMutation)(RegisterPage);
+export default graphql(loginMutation)(LoginPage);

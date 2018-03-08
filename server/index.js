@@ -1,7 +1,6 @@
 import express from 'express';
 import bodyParser from 'body-parser';
 import mongoose from 'mongoose';
-// import Promise from 'bluebird';
 import dotenv from 'dotenv';
 import { MongoClient } from 'mongodb';
 import { graphqlExpress, graphiqlExpress } from 'apollo-server-express';
@@ -29,6 +28,8 @@ const PORT = 8080;
 const app = express();
 app.use(cors('*'));
 
+// create a .env file to pass your db path as MONGO_URL or pass it manually to
+// MongoClient.connect()
 MongoClient.connect(process.env.MONGO_URL, err => {
   if (err) {
     console.log(err);
